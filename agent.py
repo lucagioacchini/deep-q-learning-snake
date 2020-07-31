@@ -4,8 +4,8 @@ from keras.optimizers import Adam
 import random 
 import math
 import numpy as np
-
-GAMMA = .9
+from stats import *
+from config import *
 
 class DQN():
     def __init__(self):
@@ -13,25 +13,26 @@ class DQN():
 
     def create_model(self):
         model = Sequential()
-        model.add(Dense(50, input_shape=(11,), activation='relu'))
-        #model.add(Dropout(.2))
-        model.add(Dense(50, activation='relu'))
-        #model.add(Dropout(.2))
-        #model.add(Dense(150, input_shape=(11,), activation='relu'))
-        #model.add(Dropout(.2))
+        model.add(Dense(L1, input_shape=(STATE_L,), activation='relu'))
+        model.add(Dropout(.2))
+        model.add(Dense(L2, activation='relu'))
+        model.add(Dropout(.2))
+        model.add(Dense(L3, activation='relu'))
+        model.add(Dropout(.2))
         model.add(Dense(4, activation='softmax'))
 
-        model.compile(loss='mse', optimizer=Adam(learning_rate=.001), metrics=['accuracy'])
-        #model.summary()
+        model.compile(loss='mse', optimizer=Adam(learning_rate=.0001), metrics=['accuracy'])
+        model.summary()
+        print('\n\n')
         return model
     
 class ReplayMemory():
     def __init__(self, model):
         self.model = model
-        self.capacity = 10000
+        self.capacity = CAPACITY
         self.memory = []
         self.push_count = 0
-        self.batch_size = 10
+        self.batch_size = BATCH
     
     def push(self, experience):
         if len(self.memory) < self.capacity:
@@ -53,19 +54,49 @@ class ReplayMemory():
         else:
             batch = self.memory
         
-        for state, act, reward, nxt_state in batch:
-            nxt_state = np.reshape(nxt_state, (1,11))
-            state = np.reshape(state, (1,11))  
-            target = reward
-            if not stop:
-                target = reward + GAMMA * np.amax(self.model.predict(nxt_state)[0])
-            target_f = self.model.predict(state)
-            target_f[0][np.argmax(act)] = target
-            self.model.fit(state, target_f, epochs=1, verbose=0)
+        state, act, reward, nxt_state = batch[0]
+        nxt_state = np.reshape(nxt_state, (1,STATE_L))
+        state = np.reshape(state, (1,STATE_L))
+        reward = np.asarray(reward)
+        act = np.asarray(act)
+
+        if len(batch)>1:
+            for state1, act1, reward1, nxt_state1 in batch[1:]:
+                nxt_state1 = np.reshape(nxt_state1, (1,STATE_L))              
+                nxt_state = np.vstack((nxt_state, nxt_state1))
+
+                reward1 = np.asarray(reward1)
+                reward = np.vstack((reward, reward1))
+
+                state1 = np.reshape(state1, (1,STATE_L))
+                state = np.vstack((state, state1))
+
+                act1 = np.asarray(act1)
+                act = np.vstack((act, act1))
+        target = reward
+        if not stop:
+            pred = self.model.predict(nxt_state)
+            m = np.amax(pred, axis=1)
+            m = np.reshape(m, (pred.shape[0],1))
+            target = np.add(reward, GAMMA * m)
+            target *= ALPHA
+        target_f = self.model.predict(state)
+        try:
+            for i in range(act.shape[0]):
+                target_f[i, int(act[i])] = target[i]
+        except IndexError:
+            target_f[:, act] = target
+
+        history = self.model.fit(state, target_f, epochs=1, verbose=0)
+        return history.history
+        
     
     def exploit(self, state):
-        state = np.reshape(state, (1,11))  
-        return  np.amax(self.model.predict(state)[0])
+        state = np.reshape(state, (1,STATE_L))  
+        pred = self.model.predict(state)[0]
+        best_act = np.argmax(pred)
+        print(best_act)
+        return  best_act
             
     
 
@@ -83,7 +114,7 @@ class Agent():
         FOOD_R, FOOD_L, FOOD_U, FOOD_D
         DIR_D, DIR_U, DIR_R, DIR_L
         """
-        state = np.zeros(11, dtype=int)
+        state = np.zeros(STATE_L, dtype=int)
 
         # Snake goes down
         if snake.dir == 0:
@@ -91,7 +122,7 @@ class Agent():
             # Obstacle Right
             head = (snake.x[0]-20 , snake.y[0])
             for i in range(1, snake.len):
-                if head == (snake.x[i], snake.y[i]) or head[0] < 0: 
+                if head == (snake.x[i], snake.y[i]) or head[0] < 10: 
                     state[0] = 1
                     break
             # Obstacle Left
@@ -119,13 +150,13 @@ class Agent():
             # Obstacle Left
             head = (snake.x[0]-20 , snake.y[0])
             for i in range(1, snake.len):
-                if head == (snake.x[i], snake.y[i]) or head[0] < 0: 
+                if head == (snake.x[i], snake.y[i]) or head[0] < 10: 
                     state[1] = 1
                     break
             # Obstacle Forward
             head = (snake.x[0] , snake.y[0]-20)
             for i in range(1, snake.len):
-                if head == (snake.x[i], snake.y[i]) or head[1] < 0: 
+                if head == (snake.x[i], snake.y[i]) or head[1] < 10: 
                     state[2] = 1
                     break
             
@@ -141,7 +172,7 @@ class Agent():
             # Obstacle Left
             head = (snake.x[0] , snake.y[0]-20)
             for i in range(1, snake.len):
-                if head == (snake.x[i], snake.y[i]) or head[1] < 0: 
+                if head == (snake.x[i], snake.y[i]) or head[1] < 10: 
                     state[1] = 1
                     break
             # Obstacle Forward
@@ -157,7 +188,7 @@ class Agent():
             # Obstacle Right
             head = (snake.x[0] , snake.y[0]-20)
             for i in range(1, snake.len):
-                if head == (snake.x[i], snake.y[i]) or head[1] < 0: 
+                if head == (snake.x[i], snake.y[i]) or head[1] < 10: 
                     state[0] = 1
                     break
             # Obstacle Left
@@ -169,7 +200,7 @@ class Agent():
             # Obstacle Forward
             head = (snake.x[0]-20 , snake.y[0])
             for i in range(1, snake.len):
-                if head == (snake.x[i], snake.y[i]) or head[0] < 0: 
+                if head == (snake.x[i], snake.y[i]) or head[0] < 10: 
                     state[2] = 1
                     break
 
@@ -179,22 +210,26 @@ class Agent():
         state[5] = int(snake.y[0]>food.pos[1])  # Food Up
         state[6] = int(snake.y[0]<food.pos[1])  # Food Down
 
+        # FOOD distance wrt head
+        dist = np.sqrt((snake.x[0]-food.pos[0])**2 + (snake.y[0]-food.pos[1])**2)
+        state[11] = dist
+
         return state 
     
     def getEpsilon(self, current_step):
-        start = 1
-        end = .01
-        decay = .05
-
-        eps = end + (start - end)*math.exp(-1*current_step*decay)
+        eps = END + (START - END)*math.exp(-1*current_step*DECAY)
 
         return eps
 
-    def setReward(self, died, ate):
+    def setReward(self, died, ate, state):
         reward = 0
-        if died: reward = -10
-        elif ate: reward = 10
-        else: reward = 0
+        if died: 
+            reward = DIED
+        elif ate: 
+            reward = ATE
+
+        reward += 1.0/state[11]*10
+        
 
         return reward
     

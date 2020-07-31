@@ -1,0 +1,26 @@
+SPEED = 1000
+TIMEOUT = 0
+
+GAMMA = .9
+ALPHA = .7
+
+START = 1
+END = .01
+DECAY = .005
+
+
+L1 = 100
+L2 = 80
+L3 = 40
+
+STATE_L = 12
+
+# Rewards
+DIED = -10.0
+ATE = 10.0
+SURVIVED = .01
+
+BATCH = 200
+CAPACITY = 1000
+
+STAT_LIM = 100
