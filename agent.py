@@ -14,16 +14,16 @@ class DQN():
     def create_model(self):
         model = Sequential()
         model.add(Dense(L1, input_shape=(STATE_L,), activation='relu'))
-        model.add(Dropout(.2))
+        #model.add(Dropout(.2))
         model.add(Dense(L2, activation='relu'))
-        model.add(Dropout(.2))
+        #model.add(Dropout(.2))
         model.add(Dense(L3, activation='relu'))
-        model.add(Dropout(.2))
-        model.add(Dense(4, activation='softmax'))
+        #model.add(Dropout(.2))
+        model.add(Dense(4))
 
-        model.compile(loss='mse', optimizer=Adam(learning_rate=.0001), metrics=['accuracy'])
+        model.compile(loss='mse', optimizer=Adam(learning_rate=LR), metrics=['accuracy'])
         model.summary()
-        print('\n\n')
+        #print('\n\n')
         return model
     
 class ReplayMemory():
@@ -54,6 +54,7 @@ class ReplayMemory():
         else:
             batch = self.memory
         
+        
         state, act, reward, nxt_state = batch[0]
         nxt_state = np.reshape(nxt_state, (1,STATE_L))
         state = np.reshape(state, (1,STATE_L))
@@ -73,33 +74,41 @@ class ReplayMemory():
 
                 act1 = np.asarray(act1)
                 act = np.vstack((act, act1))
-        target = reward
+        q_opt = reward
+        
         if not stop:
-            pred = self.model.predict(nxt_state)
-            m = np.amax(pred, axis=1)
-            m = np.reshape(m, (pred.shape[0],1))
-            target = np.add(reward, GAMMA * m)
-            target *= ALPHA
-        target_f = self.model.predict(state)
+            q_prime = self.model.predict(nxt_state)
+            #print(f"Q': {q_prime}")
+            max_q_prime = np.amax(q_prime, axis=1)
+            #print(f"max Q': {max_q_prime}")
+            max_q_prime = np.reshape(max_q_prime, (q_prime.shape[0],1))
+            #print(f"max Q': {max_q_prime}")
+            q_opt = np.add(reward, GAMMA * max_q_prime)
+            #print(f"Q*: {q_opt}")
+        target = self.model.predict(state)
+        #target = np.reshape(target, (1, 4))
+        #print(F'Target:{target}, Act: {act}')
         try:
             for i in range(act.shape[0]):
-                target_f[i, int(act[i])] = target[i]
+                target[i, int(act[i])] = q_opt[i]
         except IndexError:
-            target_f[:, act] = target
-
-        history = self.model.fit(state, target_f, epochs=1, verbose=0)
+            target[0, int(act)] = q_opt
+        ##print(f'State: {state}')
+        ##print(f'Q*: {q_opt}')
+        #print(target)
+        history = self.model.fit(state, target, epochs=1, verbose=0, batch_size=state.shape[0])
+        
         return history.history
         
     
     def exploit(self, state):
         state = np.reshape(state, (1,STATE_L))  
+        ##print(state)
         pred = self.model.predict(state)[0]
+        ##print(pred)
         best_act = np.argmax(pred)
-        print(best_act)
+        #print(pred, best_act)
         return  best_act
-            
-    
-
 
     
 
@@ -123,19 +132,21 @@ class Agent():
             head = (snake.x[0]-20 , snake.y[0])
             for i in range(1, snake.len):
                 if head == (snake.x[i], snake.y[i]) or head[0] < 10: 
-                    state[0] = 1
+                    state[0] = True
                     break
             # Obstacle Left
             head = (snake.x[0]+20 , snake.y[0])
             for i in range(1, snake.len):
-                if head == (snake.x[i], snake.y[i]) or head[0] > 580: 
-                    state[1] = 1
+                #if head == (snake.x[i], snake.y[i]) or head[0] > 580:
+                if head == (snake.x[i], snake.y[i]) or head[0] > W-40: 
+                    state[1] = True
                     break
             # Obstacle Forward
             head = (snake.x[0] , snake.y[0]+20)
             for i in range(1, snake.len):
-                if head == (snake.x[i], snake.y[i]) or head[1] > 580: 
-                    state[2] = 1
+                #if head == (snake.x[i], snake.y[i]) or head[1] > 580: 
+                if head == (snake.x[i], snake.y[i]) or head[0] > H-40:
+                    state[2] = True
                     break
             
         # Snake goes Up
@@ -144,64 +155,68 @@ class Agent():
             # Obstacle Right
             head = (snake.x[0]+20 , snake.y[0])
             for i in range(1, snake.len):
-                if head == (snake.x[i], snake.y[i]) or head[0] > 580: 
-                    state[0] = 1
+                #if head == (snake.x[i], snake.y[i]) or head[0] > 580: 
+                if head == (snake.x[i], snake.y[i]) or head[0] > W-40: 
+                    state[0] = True
                     break
             # Obstacle Left
             head = (snake.x[0]-20 , snake.y[0])
             for i in range(1, snake.len):
                 if head == (snake.x[i], snake.y[i]) or head[0] < 10: 
-                    state[1] = 1
+                    state[1] = True
                     break
             # Obstacle Forward
             head = (snake.x[0] , snake.y[0]-20)
             for i in range(1, snake.len):
                 if head == (snake.x[i], snake.y[i]) or head[1] < 10: 
-                    state[2] = 1
+                    state[2] = True
                     break
             
         # Snake goes Right
         if snake.dir == 1:
-            state[9] = 1
+            state[9] = True
             # Obstacle Right
             head = (snake.x[0] , snake.y[0]+20)
             for i in range(1, snake.len):
-                if head == (snake.x[i], snake.y[i]) or head[1] > 580: 
-                    state[0] = 1
+                #if head == (snake.x[i], snake.y[i]) or head[1] > 580: 
+                if head == (snake.x[i], snake.y[i]) or head[0] > H-40:
+                    state[0] = True
                     break
             # Obstacle Left
             head = (snake.x[0] , snake.y[0]-20)
             for i in range(1, snake.len):
                 if head == (snake.x[i], snake.y[i]) or head[1] < 10: 
-                    state[1] = 1
+                    state[1] = True
                     break
             # Obstacle Forward
             head = (snake.x[0]+20 , snake.y[0])
             for i in range(1, snake.len):
-                if head == (snake.x[i], snake.y[i]) or head[0] > 580: 
-                    state[2] = 1
+                #if head == (snake.x[i], snake.y[i]) or head[0] > 580: 
+                if head == (snake.x[i], snake.y[i]) or head[0] > W-40: 
+                    state[2] = True
                     break
         
         # Snake goes Left
         if snake.dir == 3:
-            state[10] = 1
+            state[10] = True
             # Obstacle Right
             head = (snake.x[0] , snake.y[0]-20)
             for i in range(1, snake.len):
                 if head == (snake.x[i], snake.y[i]) or head[1] < 10: 
-                    state[0] = 1
+                    state[0] = True
                     break
             # Obstacle Left
             head = (snake.x[0] , snake.y[0]+20)
             for i in range(1, snake.len):
-                if head == (snake.x[i], snake.y[i]) or head[1] > 580: 
-                    state[1] = 1
+                #if head == (snake.x[i], snake.y[i]) or head[1] > 580: 
+                if head == (snake.x[i], snake.y[i]) or head[0] > H-40:
+                    state[1] = True
                     break
             # Obstacle Forward
             head = (snake.x[0]-20 , snake.y[0])
             for i in range(1, snake.len):
                 if head == (snake.x[i], snake.y[i]) or head[0] < 10: 
-                    state[2] = 1
+                    state[2] = True
                     break
 
         # Food position wrt head            
@@ -209,11 +224,27 @@ class Agent():
         state[4] = int(snake.x[0]>food.pos[0])  # Food Left
         state[5] = int(snake.y[0]>food.pos[1])  # Food Up
         state[6] = int(snake.y[0]<food.pos[1])  # Food Down
+        """
+        dist = snake.x[0]-food.pos[0]
+        state[3] = dist
 
+        dist = -snake.x[0]+food.pos[0]
+        state[4] = dist
+
+        dist = snake.y[0]-food.pos[1]
+        state[5] = dist
+
+        dist = -snake.y[0]+food.pos[1]
+        state[6] = dist
+        """
         # FOOD distance wrt head
         dist = np.sqrt((snake.x[0]-food.pos[0])**2 + (snake.y[0]-food.pos[1])**2)
-        state[11] = dist
-
+        #state[11] = dist
+        """
+        # Snake ate or crashed
+        state[12] = snake.ate
+        state[13] = snake.crashed
+        """
         return state 
     
     def getEpsilon(self, current_step):
@@ -227,9 +258,15 @@ class Agent():
             reward = DIED
         elif ate: 
             reward = ATE
-
-        reward += 1.0/state[11]*10
-        
+        else:
+            reward = -1
+            """
+            if state[11] != 0:
+                reward -= 1.0/state[11]*10
+            else:
+                reward = -0.000000001
+            """
+        ##print(reward)
 
         return reward
     
