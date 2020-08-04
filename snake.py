@@ -40,7 +40,6 @@ class Environment():
         self.eps = 0
 
         # Screen definition
-        #if self.display: self.screen = pygame.display.set_mode((620, 620))
         if self.display: self.screen = pygame.display.set_mode((1020, 620), DOUBLEBUF)
         pygame.display.set_caption('Snake')
         
@@ -49,10 +48,6 @@ class Environment():
         self.food = Food()
     
     def render(self):
-        # Border
-        #border = pygame.draw.rect(self.screen, (0, 100, 255), (600, 600, 162, 100), 3) 
-        #border = pygame.rect.Rect(600, 600)
-        #self.screen.blit(border)
 
         # Refill the screen
         self.screen.fill((22, 29, 31))
@@ -145,7 +140,6 @@ class Environment():
         elif act == 1 and self.snake.dir != 3: 
             self.snake.dir = 1
         
-        #self.snake.dir = act
         # Perform the move
         if not self.stop:
             self.snake.move()
@@ -190,7 +184,6 @@ class Environment():
         experience = (state1, action, self.reward, state2)
         if self.train:
             self.agent.memory.push(experience)
-            #self.agent.memory.replay(self.stop)
             history = self.agent.memory.replay(self.stop)
             self.stat.loss.append(history['loss'][0])
             self.stat.accuracy.append(history['accuracy'][0]*100)
@@ -202,13 +195,11 @@ class Environment():
 
             # Get state 1
             state1 = self.agent.getState(self.snake, self.food)
-            #print(f'Old state:\n\t{state1}')
             # Exploration Rate and choose action
             if self.train: self.eps = self.agent.getEpsilon(self.step_ctr)
             else: self.eps = 0
 
             if random.random() < self.eps:
-            #if random.randint(0,1) < self.agent.getEpsilon(self.step_ctr):
                 # Explore
                 self.explore_ctr += 1 # For stats
                 action = random.randint(0,3)
@@ -216,25 +207,17 @@ class Environment():
                 # Exploit
                 self.exploit_ctr += 1 # For stats
                 action = self.agent.memory.exploit(state1)
-            #print(f'Choosen action:\n\t{action}')
             # Perform action
             self.step(action, state1)
             # Get state 2           
             state2 = self.agent.getState(self.snake, self.food) # Get state 2
-            #print(f'New State:\n\t{state2}')
             # Manage memory
             experience = (state1, action, self.reward, state2)
-            #print(f'Experience')
             if self.train:
                 self.agent.memory.push(experience)
-                #self.agent.memory.train_short_memory(state1, action, self.reward, state2, self.stop)
                 history = self.agent.memory.replay(self.stop)
                 self.stat.loss.append(history['loss'][0])
                 self.stat.accuracy.append(history['accuracy'][0]*100)
-                #print()
-        #history = self.agent.memory.replay(self.stop)
-        #self.stat.loss.append(history['loss'][0])
-        #self.stat.accuracy.append(history['accuracy'][0]*100)
             
     def selfEat(self):
         # Snake eats itself
@@ -249,13 +232,6 @@ class Environment():
 
     def foodEat(self):
         # Snake eats apple
-        """
-        collided = collide(
-            self.snake.x[0], self.food.pos[0],
-            self.snake.y[0], self.food.pos[1],
-            20, 20, 20, 20
-        )
-        """
         if self.snake.x[0] == self.food.pos[0] \
         and self.snake.y[0] == self.food.pos[1]:
             self.score+=1
@@ -288,7 +264,6 @@ class Snake():
         self.ate = False
         self.crashed = False
 
-        #if self.display:
         # Draw snake
         self.img = pygame.Surface((20, 20))
         self.img.fill((255, 255, 255))
@@ -320,8 +295,7 @@ class Food():
         # Random apple position
         self.pos = self.genPos()
         
-        #if self.display:
-            # Draw apple
+        # Draw apple
         self.img = pygame.Surface((20, 20))
         self.img.fill((163, 51, 51))
 

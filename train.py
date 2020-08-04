@@ -18,15 +18,3 @@ while True:
     env.agent.model.save_weights('weights.hdf5')
     del env
     pygame.quit()
-
-
-
-"""
-for j in range(2):
-    ##print(f'Training {j}')
-    pygame.init()
-    env = Environment(stat, episode, agent, False)
-    env.run()
-    del env
-    pygame.quit()
-"""

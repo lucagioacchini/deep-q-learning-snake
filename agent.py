@@ -23,7 +23,7 @@ class DQN():
 
         model.compile(loss='mse', optimizer=Adam(learning_rate=LR), metrics=['accuracy'])
         model.summary()
-        #print('\n\n')
+
         return model
     
 class ReplayMemory():
@@ -78,24 +78,15 @@ class ReplayMemory():
         
         if not stop:
             q_prime = self.model.predict(nxt_state)
-            #print(f"Q': {q_prime}")
             max_q_prime = np.amax(q_prime, axis=1)
-            #print(f"max Q': {max_q_prime}")
             max_q_prime = np.reshape(max_q_prime, (q_prime.shape[0],1))
-            #print(f"max Q': {max_q_prime}")
             q_opt = np.add(reward, GAMMA * max_q_prime)
-            #print(f"Q*: {q_opt}")
         target = self.model.predict(state)
-        #target = np.reshape(target, (1, 4))
-        #print(F'Target:{target}, Act: {act}')
         try:
             for i in range(act.shape[0]):
                 target[i, int(act[i])] = q_opt[i]
         except IndexError:
             target[0, int(act)] = q_opt
-        ##print(f'State: {state}')
-        ##print(f'Q*: {q_opt}')
-        #print(target)
         history = self.model.fit(state, target, epochs=1, verbose=0, batch_size=state.shape[0])
         
         return history.history
@@ -103,11 +94,9 @@ class ReplayMemory():
     
     def exploit(self, state):
         state = np.reshape(state, (1,STATE_L))  
-        ##print(state)
         pred = self.model.predict(state)[0]
-        ##print(pred)
         best_act = np.argmax(pred)
-        #print(pred, best_act)
+
         return  best_act
 
     
@@ -224,27 +213,7 @@ class Agent():
         state[4] = int(snake.x[0]>food.pos[0])  # Food Left
         state[5] = int(snake.y[0]>food.pos[1])  # Food Up
         state[6] = int(snake.y[0]<food.pos[1])  # Food Down
-        """
-        dist = snake.x[0]-food.pos[0]
-        state[3] = dist
 
-        dist = -snake.x[0]+food.pos[0]
-        state[4] = dist
-
-        dist = snake.y[0]-food.pos[1]
-        state[5] = dist
-
-        dist = -snake.y[0]+food.pos[1]
-        state[6] = dist
-        """
-        # FOOD distance wrt head
-        dist = np.sqrt((snake.x[0]-food.pos[0])**2 + (snake.y[0]-food.pos[1])**2)
-        #state[11] = dist
-        """
-        # Snake ate or crashed
-        state[12] = snake.ate
-        state[13] = snake.crashed
-        """
         return state 
     
     def getEpsilon(self, current_step):
@@ -260,13 +229,6 @@ class Agent():
             reward = ATE
         else:
             reward = -1
-            """
-            if state[11] != 0:
-                reward -= 1.0/state[11]*10
-            else:
-                reward = -0.000000001
-            """
-        ##print(reward)
 
         return reward
     
