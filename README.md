@@ -12,7 +12,7 @@ training faster it is recommended to uncomment ```H=320``` at line 7 of the ```l
 To test the network and the game run the ```test.py``` script. To observe the network generalization provided by the DQL technique it is recommended to uncomment ```H=620``` at line 8 of the ```lib.config.py``` file. . An example of the testing phase is the following:  
 ![Example of the testing phase](img/test.png)
 ## Documentation
-To obtain an overview of the Reinforcement learning and the Deep Q-Learning concepts please check the **DOCUMENTATION***.  
+To obtain an overview of the Reinforcement learning and the Deep Q-Learning concepts please check the [documentation](docs/DeepQLearning.ipynb).  
 
 The neural network is composed by one input layer with 11 neurons, one output layer with 4 neurons and three dense hidden layer with 150 neurons activated by the relu function.  
 
