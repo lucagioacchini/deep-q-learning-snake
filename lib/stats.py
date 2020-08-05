@@ -1,13 +1,22 @@
 import matplotlib
 matplotlib.use("Agg")
-
 import matplotlib.backends.backend_agg as agg
-from config import *
-
+from lib.config import STAT_LIM
 import pylab
 from collections import deque
 
 class Statistics():
+    """
+    Generate neural network metrics plots, convert them as bitstring and 
+    pass them to the pygame display to be rendered.
+
+    Attributes:
+        fig (pylab.figure): define the figure
+        ax (pyab.figure.gca): plot axes
+        loss (dequeue): collection of the loss values
+        accuracy (dequeue): collection of the accuracy values
+
+    """
     def __init__(self):
         self.fig = pylab.figure(figsize=[4,2.5])
         self.fig.set_facecolor('#161d1f')
@@ -16,12 +25,22 @@ class Statistics():
         self.accuracy = deque([])
 
     def rotateQueue(self):
+        """
+        Update the loss and accuracy lists discarding older values and 
+        appending the new ones.
+
+        """
         if len(self.loss) > STAT_LIM:
             self.loss.popleft()
         if len(self.accuracy) > STAT_LIM:
             self.accuracy.popleft()
 
     def plotLoss(self):
+        """
+        Plot the loss values, convert the plot into bit strings and pass them
+        to the pygame display
+
+        """
         self.rotateQueue()
         self.ax.clear()
         
@@ -48,6 +67,11 @@ class Statistics():
         return raw_data, size
 
     def plotAccuracy(self):
+        """
+        Plot the accuracy values, convert the plot into bit strings and pass 
+        them to the pygame display
+
+        """
         self.rotateQueue()
         self.ax.clear()
         
