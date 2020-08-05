@@ -7,9 +7,9 @@ Open a terminal and type
 
 ## Usage
 To train the network and the agent run the ```train.py``` script. To make the 
-training faster it is recommended to uncomment ```H=320``` at line 7 of the ```lib.config.py``` file.  
+training faster it is recommended to uncomment ```H=320``` at line 7 of the ```lib.config.py``` file. An example of the training phase is the following:  
 ![Example of the training phase](img/train.png)  
-To test the network and the game run the ```test.py``` script. To observe the network generalization provided by the DQL technique it is recommended to uncomment ```H=620``` at line 8 of the ```lib.config.py``` file.  
+To test the network and the game run the ```test.py``` script. To observe the network generalization provided by the DQL technique it is recommended to uncomment ```H=620``` at line 8 of the ```lib.config.py``` file. . An example of the testing phase is the following:  
 ![Example of the testing phase](img/test.png)
 ## Documentation
 To obtain an overview of the Reinforcement learning and the Deep Q-Learning concepts please check the **DOCUMENTATION***.  
