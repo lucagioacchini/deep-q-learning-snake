@@ -29,8 +29,8 @@ The state array representing the network fed as input to the neural network is a
 11. 1 if the snake is gowing left, 0 otherwise.  
 
 ## Future works
-[] Change the training method alternating a one-block snake initialization to encourage the food eating with a more-than-6 blocks snake to prevent the loop formation.
-[] Try a convolutional neural network providing 4 subsequent screen captures as input state.
+* Change the training method alternating a one-block snake initialization to encourage the food eating with a more-than-6 blocks snake to prevent the loop formation.  
+* Try a convolutional neural network providing 4 subsequent screen captures as input state.
 
 ##
 
