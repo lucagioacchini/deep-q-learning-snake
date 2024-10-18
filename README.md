@@ -3,7 +3,7 @@ This repo contains the codes implementing a playground for a Deep Q-Learning neu
 
 ## Structure of This Repo
 The repository is organized as follow:
-- the `src` folder contains all the required well-documented codes.
+- the `deepqsnake` folder contains all the required well-documented codes.
 - the `scripts` folder contains the scripts to train and test a new agent.
 - the `docs` folder contains the documentation about the Deep Q-Learning
 - the `weights` folder contains the pre-trained weights (after 120 epidsodes)

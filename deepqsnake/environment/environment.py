@@ -4,7 +4,8 @@ import numpy as np
 from .food import Food
 from .snake import Snake
 from ..agent.agent import Agent
-from src.stats import Statistics
+from deepqsnake.stats import Statistics
+
 
 class SnakeEnvironment():
     """Deep Q Learning environment. It sets up a Snake game, initializing the 
@@ -44,7 +45,7 @@ class SnakeEnvironment():
         screen (pygame.Surface): Pygame screen object for display.
         snake (Snake): Snake object representing the player.
         food (Food): Food object representing the target.
-        
+
     Methods:
         render(): Renders the game state on the screen.
         step(act: int, state: np.array): Performs a single step in the game.
@@ -53,8 +54,9 @@ class SnakeEnvironment():
         food_eat(): Checks if the snake has eaten the food.
         hit_border(): Checks if the snake has hit the border.
     """
-    def __init__(self, screen_width:int, screen_height:int, stat:Statistics, 
-                 episode:int, agent:Agent, train:bool, display:bool):
+
+    def __init__(self, screen_width: int, screen_height: int, stat: Statistics,
+                 episode: int, agent: Agent, train: bool, display: bool):
         self.width = screen_width
         self.height = screen_height
         self.stat = stat
@@ -62,11 +64,11 @@ class SnakeEnvironment():
         self.agent = agent
         self.train = train
         self.display = display
-        
+
         # Initial state
         self.state = []
 
-        # Initial reward, score and action        
+        # Initial reward, score and action
         self.reward = 0
         self.score = 0
         self.action = 0
@@ -77,7 +79,7 @@ class SnakeEnvironment():
         self.step_ctr = 0
         self.explore_ctr = 0
         self.exploit_ctr = 0
-        
+
         # Screen definition
         self.f = pygame.font.SysFont('Arial', 16)
         self.clock = pygame.time.Clock()
@@ -101,10 +103,13 @@ class SnakeEnvironment():
 
         # Render the snake
         for i in range(0, self.snake.len):
-            self.screen.blit( self.snake.img, (self.snake.x[i], self.snake.y[i]))
-            self.screen.blit(self.snake.bord1, (self.snake.x[i], self.snake.y[i]))
-            self.screen.blit(self.snake.bord2, (self.snake.x[i], self.snake.y[i]))
-        
+            self.screen.blit(
+                self.snake.img, (self.snake.x[i], self.snake.y[i]))
+            self.screen.blit(self.snake.bord1,
+                             (self.snake.x[i], self.snake.y[i]))
+            self.screen.blit(self.snake.bord2,
+                             (self.snake.x[i], self.snake.y[i]))
+
         # Render the food
         self.screen.blit(self.food.img, self.food.pos)
 
@@ -118,7 +123,7 @@ class SnakeEnvironment():
         self.screen.blit(t, (630, 30))
 
         txt = (f'Epsilon: {round(self.eps, 3)}   Explore: {self.explore_ctr}'
-            f'   Exploit: {self.exploit_ctr}')
+               f'   Exploit: {self.exploit_ctr}')
         t = self.f.render(txt, True, (255, 255, 255))
         self.screen.blit(t, (630, 50))
 
@@ -126,17 +131,17 @@ class SnakeEnvironment():
         bord = pygame.Surface((10, self.height))
         bord.fill((255, 255, 255))
         self.screen.blit(bord, (0, 0))
-        
+
         # Border -  Right bar
         bord = pygame.Surface((10, self.height))
         bord.fill((255, 255, 255))
         self.screen.blit(bord, (self.width-10, 0))
-        
+
         # Border -  Up bar
         bord = pygame.Surface((self.width, 10))
         bord.fill((255, 255, 255))
         self.screen.blit(bord, (0, 0))
-        
+
         # Border -  Down bar
         bord = pygame.Surface((self.width, 10))
         bord.fill((255, 255, 255))
@@ -153,7 +158,7 @@ class SnakeEnvironment():
             surf = pygame.image.fromstring(acc, asize, 'RGB')
 
             self.screen.blit(surf, (630, 350))
-        
+
         # Plot sample network
         else:
             for i in range(len(self.state)):
@@ -166,8 +171,10 @@ class SnakeEnvironment():
                     self.screen, (255, 255, 255), (820, 100+40*i), 14)
 
             for i in range(4):
-                if i == self.action: y = 0
-                else: y = 1
+                if i == self.action:
+                    y = 0
+                else:
+                    y = 1
                 color = (72*(1-y)+255*y, 156*(1-y)+255*y, 81*(1-y)+255*y)
                 pygame.draw.circle(self.screen, color, (970, 260+40*i), 14)
 
@@ -177,13 +184,13 @@ class SnakeEnvironment():
                                      (670+15, 120+40*i), (820-15, 100+40*j), 1)
                     for k in range(4):
                         pygame.draw.line(
-                            self.screen, (255, 255, 255), 
+                            self.screen, (255, 255, 255),
                             (820+15, 100+40*j), (970-15, 260+40*k), 1
                         )
 
         pygame.display.update()
 
-    def step(self, act:int, state:np.array):
+    def step(self, act: int, state: np.array):
         """At each game step evaluate the game status (if the snake eats itself
         or collides with the borders). Then perform the snake move and get the 
         reward.
@@ -200,10 +207,14 @@ class SnakeEnvironment():
         self.clock.tick(1000)
 
         # Manage actions
-        if act == 2 and self.snake.dir != 0: self.snake.dir = 2
-        elif act == 0 and self.snake.dir != 2: self.snake.dir = 0
-        elif act == 3 and self.snake.dir != 1: self.snake.dir = 3
-        elif act == 1 and self.snake.dir != 3: self.snake.dir = 1
+        if act == 2 and self.snake.dir != 0:
+            self.snake.dir = 2
+        elif act == 0 and self.snake.dir != 2:
+            self.snake.dir = 0
+        elif act == 3 and self.snake.dir != 1:
+            self.snake.dir = 3
+        elif act == 1 and self.snake.dir != 3:
+            self.snake.dir = 1
 
         # Perform the move
         if not self.stop:
@@ -227,8 +238,10 @@ class SnakeEnvironment():
             self.stop = True
 
         if self.display:
-            try: self.render()
-            except: pass
+            try:
+                self.render()
+            except:
+                pass
 
     def run(self):
         """Core of the snake game. At each step get the initial position, apply
@@ -279,7 +292,7 @@ class SnakeEnvironment():
                 self.action = action
             # Perform action
             self.step(action, state1)
-            
+
             # Get state 2
             state2 = self.agent.get_state(self.snake, self.food)  # Get state 2
             # Manage memory
@@ -322,7 +335,7 @@ class SnakeEnvironment():
             self.food.pos = self.food.gen_pos()
             for i in range(self.snake.len):
                 if self.food.pos[0] == self.snake.x[i] \
-                or self.food.pos[1] == self.snake.y[i]:
+                        or self.food.pos[1] == self.snake.y[i]:
                     self.food.pos = self.food.gen_pos()
 
             return True
