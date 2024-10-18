@@ -3,8 +3,8 @@
 # =============
 SPEED = 1000
 
-H = 620 # Testing screen height
-#H = 320 # Training screen height
+#H = 620 # Testing screen height
+H = 320 # Training screen height
 W = H # Screen width
 
 

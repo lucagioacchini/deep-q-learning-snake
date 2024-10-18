@@ -1,5 +1,5 @@
 from keras import Sequential
-from keras.layers.core import Dense, Dropout, Activation
+from keras.layers import Dense, Dropout, Activation
 from keras.optimizers import Adam
 import random
 import math
