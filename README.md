@@ -4,7 +4,6 @@ This repo contains the codes implementing a playground for a Deep Q-Learning neu
 ## Structure of This Repo
 The repository is organized as follow:
 - the `deepqsnake` folder contains all the required well-documented codes.
-- the `scripts` folder contains the scripts to train and test a new agent.
 - the `docs` folder contains the documentation about the Deep Q-Learning
 - the `weights` folder contains the pre-trained weights (after 120 epidsodes)
 
@@ -23,7 +22,7 @@ sudo ./setup.sh
 ## How to Train and Test a New Agent
 To train a new agent simply open a terminal and run:
 ```bash
-python3 scripts/train_snake.py
+python3 train_snake.py
 ```
 In the training file you can provide the size of the game display. I used 320 pixels as width and height.
 
@@ -32,7 +31,7 @@ An example of the training phase is the following:
 
 To test a pre-trained agent, open a terminal and run:
 ```bash
-python3 scripts/test_snake.py
+python3 test_snake.py
 ```
 
 An example of the testing phase is the following:  
