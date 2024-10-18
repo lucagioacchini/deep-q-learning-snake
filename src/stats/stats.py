@@ -1,7 +1,6 @@
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.backends.backend_agg as agg
-from lib.config import STAT_LIM
 import pylab
 from collections import deque
 
@@ -30,9 +29,9 @@ class Statistics():
         appending the new ones.
 
         """
-        if len(self.loss) > STAT_LIM:
+        if len(self.loss) > 100:
             self.loss.popleft()
-        if len(self.accuracy) > STAT_LIM:
+        if len(self.accuracy) > 100:
             self.accuracy.popleft()
 
     def plotLoss(self):
@@ -44,7 +43,7 @@ class Statistics():
         self.rotateQueue()
         self.ax.clear()
         
-        self.ax.set_xlim(0, STAT_LIM)
+        self.ax.set_xlim(0, 100)
         self.ax.spines['right'].set_visible(False)
         self.ax.spines['left'].set_color('white')
         self.ax.spines['bottom'].set_color('white')
@@ -75,7 +74,7 @@ class Statistics():
         self.rotateQueue()
         self.ax.clear()
         
-        self.ax.set_xlim(0, STAT_LIM)
+        self.ax.set_xlim(0, 100)
         self.ax.spines['right'].set_visible(False)
         self.ax.spines['left'].set_color('white')
         self.ax.spines['bottom'].set_color('white')
