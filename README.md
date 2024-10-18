@@ -1,5 +1,5 @@
 # Deep Q-Learning Applied to the Snake Arcade Game
-Implementation of a Deep Q-Learning neural network able to automatically play the Snake arcade game.
+This repo contains the codes implementing a playground for a Deep Q-Learning neural network to automatically play the Snake arcade game.
 
 ## Structure of This Repo
 The repository is organized as follow:
